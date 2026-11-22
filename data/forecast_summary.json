@@ -1,0 +1,80 @@
+{
+  "data_source": "PJM AEP hourly (GitHub)",
+  "last_actual_timestamp": "2018-08-03 00:00:00",
+  "validation_mape_percent": 2.46,
+  "forecast_start": "2018-08-03 01:00:00",
+  "forecast_end": "2018-08-13 00:00:00",
+  "avg_predicted_mw": 14788.53,
+  "peak_load_mw": 18922.73,
+  "peak_load_timestamp": "2018-08-09 19:00:00",
+  "lowest_load_mw": 10405.77,
+  "lowest_load_timestamp": "2018-08-05 06:00:00",
+  "optimized_peak_mw": 17479.31,
+  "total_baseline_mwh": 3549247.9,
+  "total_optimized_mwh": 3476282.8,
+  "estimated_mwh_saved": 72965.1,
+  "assumptions": {
+    "peak_hours": "hours 14 to 20",
+    "offpeak_hours": "hours 1 to 5",
+    "peak_shave_percent": 12,
+    "share_of_shaved_energy_shifted_percent": 50,
+    "note": "Savings are a simulation based on these assumptions, not measured savings."
+  },
+  "daily_breakdown": {
+    "2018-08-03": {
+      "mean": 15487.0,
+      "max": 18227.2,
+      "min": 12058.1
+    },
+    "2018-08-04": {
+      "mean": 13927.5,
+      "max": 16464.8,
+      "min": 11181.6
+    },
+    "2018-08-05": {
+      "mean": 13437.6,
+      "max": 16266.8,
+      "min": 10405.8
+    },
+    "2018-08-06": {
+      "mean": 15023.3,
+      "max": 17844.0,
+      "min": 11379.1
+    },
+    "2018-08-07": {
+      "mean": 15387.0,
+      "max": 18310.6,
+      "min": 11801.1
+    },
+    "2018-08-08": {
+      "mean": 15548.3,
+      "max": 18589.4,
+      "min": 11927.0
+    },
+    "2018-08-09": {
+      "mean": 15699.8,
+      "max": 18922.7,
+      "min": 12081.6
+    },
+    "2018-08-10": {
+      "mean": 15373.8,
+      "max": 18387.4,
+      "min": 12157.6
+    },
+    "2018-08-11": {
+      "mean": 14216.9,
+      "max": 17453.2,
+      "min": 11461.7
+    },
+    "2018-08-12": {
+      "mean": 13856.7,
+      "max": 17653.0,
+      "min": 10799.6
+    },
+    "2018-08-13": {
+      "mean": 13747.2,
+      "max": 13747.2,
+      "min": 13747.2
+    }
+  }
+}
