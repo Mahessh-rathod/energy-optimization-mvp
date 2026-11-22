@@ -246,6 +246,45 @@ Write a short insight report (max 250 words) with these sections:
 
 
 # ---------- RAG chatbot ----------
+# ---------- AI insights: choose a type and audience ----------
+INSIGHT_TYPES = {
+    "Executive summary": "Write an executive summary (max 150 words): what the next 10 days look like, the main risk, and the single most important action.",
+    "Peak risk and actions": "Explain when the peak happens and how far it is above the average load. Give 3 specific actions to reduce the risk, based on the documents.",
+    "Day-by-day outlook": "Go through the days in the daily breakdown. Give one line per day (average and peak) and point out the busiest and quietest days.",
+    "Cost and tariff opportunities": "Using the tariff in the documents, explain where load shifting could lower cost. Do not invent dollar amounts; explain the logic and say what extra data would be needed to calculate real savings.",
+    "Explain my what-if scenario": "Explain what the WHAT-IF SCENARIO changes compared with the baseline forecast: the peak, the energy moved, and whether this looks realistic. Compare it with the default assumption of 12% shaving and 50% shifting.",
+}
+
+AUDIENCES = {
+    "Energy manager": "Use practical, operational language.",
+    "Executive": "Use plain business language with no jargon. Focus on risk and decisions.",
+    "Beginner": "Explain simply and define any technical term in a few words.",
+}
+
+
+def generate_custom_insight(kind, audience, summary, index, scenario=None):
+    task = INSIGHT_TYPES.get(kind, INSIGHT_TYPES["Executive summary"])
+    style = AUDIENCES.get(audience, AUDIENCES["Energy manager"])
+    hits = index.search(f"{kind} peak demand tariff load shifting maintenance", k=3)
+    scenario_block = ""
+    if scenario:
+        scenario_block = f"\nWHAT-IF SCENARIO (simulated, chosen by the user):\n{json.dumps(scenario, indent=2)}\n"
+    prompt = f"""FORECAST SUMMARY (JSON):
+{json.dumps(summary, indent=2)}
+
+DOCUMENTS:
+{format_context(hits)}
+{scenario_block}
+AUDIENCE: {style}
+TASK: {task}
+
+Rules: use only the numbers provided above. Treat all savings as simulated, not measured. Keep it under 200 words. End with one line starting with "Caveat:" that mentions the validation MAPE.
+"""
+    try:
+        return ask_llm(prompt)
+    except AIUnavailable:
+        return fallback_insights(summary)
+
 def answer_question(question, summary, index, history=None):
     """history: list of {"role": "user" | "assistant", "content": str}."""
     hits = index.search(question, k=3)
