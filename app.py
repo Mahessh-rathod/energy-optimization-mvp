@@ -128,14 +128,55 @@ with tabs[1]:
 # ---------- Module 3: AI insights ----------
 with tabs[2]:
     st.subheader("AI insights")
-    st.write("Generates a short report from the forecast numbers and your documents.")
-    if st.button("Generate AI insights"):
+    st.write("Choose what you want to know and who it is for. Use the sliders to test a what-if scenario.")
+
+    c1, c2 = st.columns(2)
+    kind = c1.selectbox("Insight type", list(rag.INSIGHT_TYPES.keys()))
+    audience = c2.selectbox("Audience", list(rag.AUDIENCES.keys()))
+
+    st.markdown("**What-if scenario (simulation)**")
+    s1, s2 = st.columns(2)
+    shave = s1.slider("Peak shaving: % cut in hours 14 to 20", 0, 30, 12)
+    shift = s2.slider("% of the cut energy moved to hours 1 to 5", 0, 100, 50)
+
+    sc = fc[["Datetime", "Predicted_MW"]].copy()
+    hour = sc["Datetime"].dt.hour
+    peak_mask = hour.between(14, 20)
+    off_mask = hour.between(1, 5)
+    shaved = sc.loc[peak_mask, "Predicted_MW"] * shave / 100
+    sc["Scenario_MW"] = sc["Predicted_MW"]
+    sc.loc[peak_mask, "Scenario_MW"] -= shaved
+    sc.loc[off_mask, "Scenario_MW"] += shaved.sum() * (shift / 100) / max(off_mask.sum(), 1)
+
+    base_peak = sc["Predicted_MW"].max()
+    scen_peak = sc["Scenario_MW"].max()
+    saved = sc["Predicted_MW"].sum() - sc["Scenario_MW"].sum()
+
+    m1, m2, m3 = st.columns(3)
+    m1.metric("Baseline peak", f"{base_peak:,.0f} MW")
+    m2.metric("Scenario peak", f"{scen_peak:,.0f} MW",
+              f"{(scen_peak - base_peak) / base_peak * 100:.1f}%", delta_color="inverse")
+    m3.metric("Simulated energy saved", f"{saved:,.0f} MWh")
+
+    scenario = {
+        "peak_shave_percent": shave,
+        "share_shifted_to_offpeak_percent": shift,
+        "baseline_peak_mw": round(float(base_peak), 1),
+        "scenario_peak_mw": round(float(scen_peak), 1),
+        "simulated_mwh_saved": round(float(saved), 1),
+    }
+
+    if st.button("Generate insight"):
         with st.spinner("Asking the AI..."):
-            st.session_state["insights"] = rag.generate_insights(summary, index)
+            st.session_state["insights"] = rag.generate_custom_insight(
+                kind, audience, summary, index,
+                scenario if kind == "Explain my what-if scenario" else None,
+            )
             st.session_state["insights_by"] = provider_label()
     if "insights" in st.session_state:
         st.markdown(st.session_state["insights"])
         st.caption(f"Answered by: {st.session_state['insights_by']}")
+        st.download_button("Download insight (.txt)", st.session_state["insights"], "energy_insight.txt")
 
 # ---------- Module 4: RAG chatbot ----------
 with tabs[3]:
