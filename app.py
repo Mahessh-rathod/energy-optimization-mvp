@@ -46,6 +46,7 @@ with st.sidebar:
     st.caption(f"Data source: {summary.get('data_source', 'unknown')}")
     st.caption(f"Forecast: {summary['forecast_start'][:16]} to {summary['forecast_end'][:16]}")
     st.caption("AI chain: Gemini, then Groq, then offline fallback")
+    st.caption("Note: the public PJM dataset ends in August 2018, so the forecast covers a 2018 window.")
 
 
 # ---------- Header and KPIs ----------
