@@ -16,11 +16,11 @@ DATA_DIR = os.path.join(BASE_DIR, "data")
 DOCS_DIR = os.path.join(BASE_DIR, "docs")
 
 # ---------- Settings (change models here) ----------
-GEMINI_MODELS = ("gemini-3.8-flash",)      # add more names here if your key lists them
+GEMINI_MODELS = ("gemini-3.8-flash",)      # add more names here if our key lists them
 GEMINI_SECRET = "My_api_key"
 GEMINI_RETRIES = 3
 
-GROQ_MODEL = "llama-3.3-70b-versatile"     # change if your Groq model list shows another name
+GROQ_MODEL = "openai/gpt-oss-20b"     # change if our Groq model list shows another name
 GROQ_SECRET = "Groq_api_key"
 
 USE_LOCAL_MODEL = False                    # True only if you set up the Hugging Face backup
@@ -220,7 +220,7 @@ def fallback_answer(hits):
     if not hits:
         return "The AI service is busy and no matching document passage was found. Please try again in a minute."
     text = "\n\n".join(f"[{src}]\n{chunk}" for src, chunk, _ in hits)
-    return "The AI service is busy, so here are the most relevant passages from your documents:\n\n" + text
+    return "The AI service is busy, so here are the most relevant passages from our documents:\n\n" + text
 
 
 # ---------- AI insights ----------
