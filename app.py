@@ -47,6 +47,24 @@ with st.sidebar:
     st.caption(f"Forecast: {summary['forecast_start'][:16]} to {summary['forecast_end'][:16]}")
     st.caption("AI chain: Gemini, then Groq, then offline fallback")
 
+def has_secret(name):
+    try:
+        return name in st.secrets
+    except Exception:
+        return False
+
+
+with st.sidebar:
+    with st.expander("AI diagnostics"):
+        st.write("Gemini secret found:", has_secret("My_api_key"))
+        st.write("Groq secret found:", has_secret("Groq_api_key"))
+        if st.button("Test AI providers"):
+            for name, fn in (("Gemini", rag._ask_gemini), ("Groq", rag._ask_groq)):
+                try:
+                    fn("Reply with the single word: OK", rag.SYSTEM_PROMPT)
+                    st.success(f"{name}: working")
+                except Exception as exc:
+                    st.error(f"{name}: {type(exc).__name__}: {str(exc)[:200]}")
 # ---------- Header and KPIs ----------
 st.title("Energy Optimization Dashboard")
 k1, k2, k3, k4 = st.columns(4)
