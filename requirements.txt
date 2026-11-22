@@ -1,0 +1,8 @@
+pandas
+numpy
+xgboost
+scikit-learn
+plotly
+streamlit
+google-genai
+groq
