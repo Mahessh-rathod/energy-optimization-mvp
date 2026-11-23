@@ -111,7 +111,7 @@ Python, Pandas, NumPy, XGBoost, scikit-learn, Plotly, Streamlit, Google Gemini, 
 
         streamlit run app.py
 
-## Limits of this project
+## Limitations & Error Analysis
 
 I want to be clear about what this project is and is not:
 
