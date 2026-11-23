@@ -26,8 +26,8 @@ def load_data():
 def get_index():
     return rag.DocIndex()
 @st.cache_resource
-    def get_executor():
-        return ThreadPoolExecutor(max_workers=2)
+def get_executor():
+    return ThreadPoolExecutor(max_workers=2)
 
 try:
     fc, hist, summary = load_data()
