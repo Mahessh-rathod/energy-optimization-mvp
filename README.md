@@ -14,7 +14,7 @@
 - **Built to keep working:** if one AI service is busy or out of quota, the app switches to another, then to a plain summary.
 - **Deployed:** a live Streamlit app, built from raw data to web page.
 
-**Built with:** Python, Pandas, XGBoost, scikit-learn, Plotly, Streamlit, Gemini and Groq APIs.
+
 
 ## What the app does
 
