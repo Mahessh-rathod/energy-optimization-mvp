@@ -18,7 +18,7 @@ DOCS_DIR = os.path.join(BASE_DIR, "docs")
 # ---------- Settings (change models here) ----------
 GEMINI_MODELS = ("gemini-3.8-flash",)      # add more names here if our key lists them
 GEMINI_SECRET = "My_api_key"
-GEMINI_RETRIES = 3
+GEMINI_RETRIES = 2
 
 GROQ_MODEL = "openai/gpt-oss-20b"     # change if our Groq model list shows another name
 GROQ_SECRET = "Groq_api_key"
@@ -69,7 +69,10 @@ _gemini_client = None
 def _ask_gemini(prompt, system):
     global _gemini_client
     if _gemini_client is None:
-        _gemini_client = genai.Client(api_key=get_secret(GEMINI_SECRET))
+            _gemini_client = genai.Client(
+            api_key=get_secret(GEMINI_SECRET),
+            http_options=types.HttpOptions(timeout=20000),  # 20 seconds, in milliseconds
+            )
     config = types.GenerateContentConfig(system_instruction=system, temperature=0.3)
     last_exc = None
     for model in GEMINI_MODELS:
@@ -96,7 +99,7 @@ def _ask_gemini(prompt, system):
 # ---------- Provider 2: Groq ----------
 def _ask_groq(prompt, system):
     from groq import Groq
-    client = Groq(api_key=get_secret(GROQ_SECRET))
+    client = Groq(api_key=get_secret(GROQ_SECRET), timeout=25.0)  # 25 seconds
     resp = client.chat.completions.create(
         model=GROQ_MODEL,
         messages=[
