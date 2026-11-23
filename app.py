@@ -1,6 +1,7 @@
 import json
 import os
-
+import time
+from concurrent.futures import ThreadPoolExecutor
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
@@ -23,6 +24,9 @@ def load_data():
 
 @st.cache_resource
 def get_index():
+    @st.cache_resource
+def get_executor():
+    return ThreadPoolExecutor(max_workers=2)
     return rag.DocIndex()
 
 
@@ -170,24 +174,54 @@ with tabs[3]:
     if "messages" not in st.session_state:
         st.session_state.messages = []
 
+    # Chat history
     for m in st.session_state.messages:
         with st.chat_message(m["role"]):
             st.markdown(m["content"])
-
-    question = st.chat_input("Ask a question...")
-    if question:
-        history = list(st.session_state.messages)
-        st.session_state.messages.append({"role": "user", "content": question})
-        with st.chat_message("user"):
-            st.markdown(question)
-        with st.chat_message("assistant"):
-            with st.spinner("Thinking..."):
-                answer, hits = rag.answer_question(question, summary, index, history)
-            st.markdown(answer)
-            st.caption(f"Answered by: {provider_label()}")
-            if hits:
+            if m.get("by"):
+                st.caption(f"Answered by: {m['by']}")
+            if m.get("hits"):
                 with st.expander("Sources used"):
-                    for src, chunk, score in hits:
+                    for src, chunk, score in m["hits"]:
                         st.markdown(f"**{src}** (match score {score:.2f})")
                         st.write(chunk)
-        st.session_state.messages.append({"role": "assistant", "content": answer})
+
+    job = st.session_state.get("job")
+    question = st.chat_input("Ask a question...", disabled=bool(job))
+
+    # New question: start the AI call in the background
+    if question and not job:
+        history = list(st.session_state.messages)
+        st.session_state.messages.append({"role": "user", "content": question})
+        st.session_state["job"] = {
+            "future": get_executor().submit(rag.answer_question, question, summary, index, history),
+            "t0": time.time(),
+        }
+        st.rerun()
+
+    # A question is being answered: show Stop and wait
+    if job:
+        with st.chat_message("assistant"):
+            stop = st.button("Stop", key="stop_btn")
+            status = st.empty()
+
+        if stop:  # the user clicked Stop: forget this answer
+            st.session_state.pop("job", None)
+            st.session_state.messages.append(
+                {"role": "assistant", "content": "Stopped. Ask again, or try a shorter question."}
+            )
+            st.rerun()
+
+        while not job["future"].done():
+            status.info(f"Thinking... {time.time() - job['t0']:.0f}s")
+            time.sleep(0.3)
+
+        try:
+            answer, hits = job["future"].result()
+        except Exception as exc:
+            answer, hits = f"Something went wrong ({type(exc).__name__}). Please try again.", []
+        st.session_state.pop("job", None)
+        st.session_state.messages.append(
+            {"role": "assistant", "content": answer, "by": provider_label(), "hits": hits}
+        )
+        st.rerun()
