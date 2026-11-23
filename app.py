@@ -24,11 +24,10 @@ def load_data():
 
 @st.cache_resource
 def get_index():
-    @st.cache_resource
+    return rag.DocIndex()
+ @st.cache_resource
     def get_executor():
         return ThreadPoolExecutor(max_workers=2)
-    return rag.DocIndex()
-
 
 try:
     fc, hist, summary = load_data()
