@@ -25,7 +25,7 @@ def load_data():
 @st.cache_resource
 def get_index():
     return rag.DocIndex()
- @st.cache_resource
+@st.cache_resource
     def get_executor():
         return ThreadPoolExecutor(max_workers=2)
 
